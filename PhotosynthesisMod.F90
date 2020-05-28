@@ -1277,7 +1277,7 @@ contains
 !lje & bmr****
     real(r8) :: ja      ! electron transport rate as defined by Lee et al. 2015. (umol electrons/m**2/s)
     real(r8) :: po0           ! dark adapted photochemical yield
-	real(r8) :: Kd,Kf,Kp
+	real(r8) :: Kd,Kf,Kp	!rate constants
 !lje & bmr$$$$  
 !rl $$$$  
 
@@ -2953,7 +2953,7 @@ contains
 !lje & bmr****
     real(r8) :: ja      ! electron transport rate as defined by Lee et al. 2015. (umol electrons/m**2/s)
     real(r8) :: po0           ! dark adapted photochemical yield
-	real(r8) :: Kd,Kf,Kp
+	real(r8) :: Kd,Kf,Kp 	!rate constants
 !lje & bmr$$$$   
 !rl $$$$
 
@@ -5575,9 +5575,9 @@ contains
   real(r8) :: Kn       ! rate constant for non-photochemical quenching
   real(r8) :: x        ! degree of light saturation
   real(r8) :: fm       ! light adapted fluorescence yield Fm
-  real(r8) :: fo0      ! SCOPE
-  real(r8) :: eta      ! SCOPE
-  real(r8) :: x_alpha      ! SCOPE
+  real(r8) :: fo0      ! dark adapted fluorescence yield
+  real(r8) :: eta      ! from SCOPE
+  real(r8) :: x_alpha  ! for Kn
   
   x    = 1._r8 - ps / po0
   x_alpha = exp(log(x) * 2.83_r8)
