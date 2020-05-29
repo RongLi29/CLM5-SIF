@@ -12,3 +12,5 @@ UrbanAlbedoMod.F90: Account for urban landuints for added variables (ftnn, ftin,
 CanopyFluxesMod.F90: add input variables when calling PhotosynthesisTotal (for calculation of canopy scattering)
 
 pftconMod.F90: add Clumping index for each pft as an input
+
+clm5_params.c171117_CI_Vcmax_rt.nc: add clumping index (CI), change flnr (for TRY Vcmax), leaf reflecatnce & transmittance
