@@ -1437,8 +1437,8 @@ contains
                 tmp2 = ( (1._r8-fcansno(p))*omegal*betail + fcansno(p)*omegas(ib)*betais ) / tmp0
 !rl viewing ****
 				tmp10 = ( (1._r8-fcansno(p))*omegal*vbetadl + fcansno(p)*omegas(ib)*betads ) / tmp0
-				tmp11 = ( (1._r8-fcansno(p))*omegal*rhosnl + fcansno(p)*omegas(ib)*betads ) / tmp0
-				tmp12 = ( (1._r8-fcansno(p))*omegal*tausnl + fcansno(p)*omegas(ib)*betads ) / tmp0
+				tmp11 = ( (1._r8-fcansno(p))*rhosnl + fcansno(p)*omegas(ib))
+				tmp12 = ( (1._r8-fcansno(p))*tausnl )
 !rl viewing $$$$
              else
                 tmp0 =   (1._r8-fwet(p))*omegal        + fwet(p)*omegas(ib)
@@ -1446,8 +1446,8 @@ contains
                 tmp2 = ( (1._r8-fwet(p))*omegal*betail + fwet(p)*omegas(ib)*betais ) / tmp0
 !rl viewing ****
 				tmp10 = ( (1._r8-fwet(p))*omegal*vbetadl + fwet(p)*omegas(ib)*betads ) / tmp0
-				tmp11 = ( (1._r8-fwet(p))*omegal*rhosnl + fwet(p)*omegas(ib)*betads ) / tmp0
-				tmp12 = ( (1._r8-fwet(p))*omegal*tausnl + fwet(p)*omegas(ib)*betads ) / tmp0
+				tmp11 = ( (1._r8-fwet(p))*rhosnl + fwet(p)*omegas(ib))
+				tmp12 = ( (1._r8-fwet(p))*tausnl )
 !rl viewing $$$$
              end if
           end if  ! end Snow free
@@ -1623,8 +1623,8 @@ contains
 		  gamma = acos(-1._r8/tan(acos(cosl))/tan(acos(cosz)))
 		  vw = 1._r8/Pi*(cosl**2*(gamma*omega(p,ib)-Pi*tausn)+sin(gamma)*tan(acos(cosz))*cosl*sin(acos(cosl))*omega(p,ib))
 		  end if
-		  vv = omega(p,ib) * vtwostext(p) * vbetad
-		  vu = omega(p,ib) * vtwostext(p) * (1._r8 - vbetad)
+		  vv = omega(p,ib) * vtwostext(p) * (1._r8 - vbetad)
+		  vu = omega(p,ib) * vtwostext(p) * vbetad
 		  h11 = vw + vv * h1 / sigma + vu * h4 / sigma 
 		  h12 = vv * h2 + vu * h5 
 		  h13 = vv * h3 + vu * h6
