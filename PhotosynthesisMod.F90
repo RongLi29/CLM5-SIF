@@ -5591,7 +5591,7 @@ contains
 
   fo0  = Kf / (Kf + Kp + Kd)
   eta  = fs / fo0 ! SCOPE method
-  fs   = eta * 0.0616 
+  fs   = eta * 0.0607 
   
   end subroutine fluorescence  
 
