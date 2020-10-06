@@ -473,14 +473,14 @@ contains
 			avgflag='A', long_name='fluorescence escaping canopy', &
 			ptr_patch=this%sifescn_patch, set_lake=0._r8, set_urb=0._r8)
 !rl up $$$$
-	   this%psnsun_patch(begp:endp) = spval
-       call hist_addfld1d (fname='PSNSUN', units='umolCO2/m^2/s', &
-            avgflag='A', long_name='sunlit leaf photosynthesis', &
-            ptr_patch=this%psnsun_patch)
-       this%psnsha_patch(begp:endp) = spval
-       call hist_addfld1d (fname='PSNSHA', units='umolCO2/m^2/s', &
-            avgflag='A', long_name='shaded leaf photosynthesis', &
-            ptr_patch=this%psnsha_patch)
+!	   this%psnsun_patch(begp:endp) = spval
+!       call hist_addfld1d (fname='PSNSUN', units='umolCO2/m^2/s', &
+!            avgflag='A', long_name='sunlit leaf photosynthesis', &
+!            ptr_patch=this%psnsun_patch)
+!       this%psnsha_patch(begp:endp) = spval
+!       call hist_addfld1d (fname='PSNSHA', units='umolCO2/m^2/s', &
+!            avgflag='A', long_name='shaded leaf photosynthesis', &
+!            ptr_patch=this%psnsha_patch)
 	   this%parsun_patch(begp:endp) = spval
        call hist_addfld1d (fname='PARSUN', units='W/m2',  &
 			avgflag='A', long_name='absorbed PAR sunlit', &
@@ -1409,7 +1409,8 @@ contains
          )
 
       if (phase == 'sun') then
-         par_z     =>    solarabs_inst%parsun_z_patch        ! Input:  [real(r8) (:,:) ]  par absorbed per unit lai for canopy layer (w/m**2)
+!rl          par_z     =>    solarabs_inst%parsun_z_patch        ! Input:  [real(r8) (:,:) ]  par absorbed per unit lai for canopy layer (w/m**2)
+         par_z     =>    solarabs_inst%parlsun_z_patch        !rl ! Input:  [real(r8) (:,:) ]  par absorbed per unit lai for canopy layer (w/m**2)
          lai_z     =>    canopystate_inst%laisun_z_patch     ! Input:  [real(r8) (:,:) ]  leaf area index for canopy layer, sunlit or shaded
          vcmaxcint =>    surfalb_inst%vcmaxcintsun_patch     ! Input:  [real(r8) (:)   ]  leaf to canopy scaling coefficient
          alphapsn  =>    photosyns_inst%alphapsnsun_patch    ! Input:  [real(r8) (:)   ]  13C fractionation factor for PSN ()
@@ -1437,7 +1438,8 @@ contains
          psn_wj    =>    photosyns_inst%psnsun_wj_patch      ! Output: [real(r8) (:)   ]  RuBP-limited foliage photosynthesis (umol co2 /m**2/ s) [always +]
          psn_wp    =>    photosyns_inst%psnsun_wp_patch      ! Output: [real(r8) (:)   ]  product-limited foliage photosynthesis (umol co2 /m**2/ s) [always +]
       else if (phase == 'sha') then
-         par_z     =>    solarabs_inst%parsha_z_patch        ! Input:  [real(r8) (:,:) ]  par absorbed per unit lai for canopy layer (w/m**2)
+!rl         par_z     =>    solarabs_inst%parsha_z_patch        ! Input:  [real(r8) (:,:) ]  par absorbed per unit lai for canopy layer (w/m**2)
+         par_z     =>    solarabs_inst%parlsha_z_patch        !rl ! Input:  [real(r8) (:,:) ]  par absorbed per unit lai for canopy layer (w/m**2)
          lai_z     =>    canopystate_inst%laisha_z_patch     ! Input:  [real(r8) (:,:) ]  leaf area index for canopy layer, sunlit or shaded
          vcmaxcint =>    surfalb_inst%vcmaxcintsha_patch     ! Input:  [real(r8) (:)   ]  leaf to canopy scaling coefficient
          alphapsn  =>    photosyns_inst%alphapsnsha_patch    ! Input:  [real(r8) (:)   ]  13C fractionation factor for PSN ()
@@ -3175,7 +3177,8 @@ contains
          gs_mol_sha_ln => photosyns_inst%gs_mol_sha_ln_patch   & ! Output: [real(r8) (:,:) ]  shaded leaf stomatal conductance averaged over 1 hour before to 1 hour after local noon (umol H2O/m**2/s)
          )
 
-      par_z_sun     =>    solarabs_inst%parsun_z_patch        ! Input:  [real(r8) (:,:) ]  par absorbed per unit lai for canopy layer (w/m**2)
+!rl      par_z_sun     =>    solarabs_inst%parsun_z_patch        ! Input:  [real(r8) (:,:) ]  par absorbed per unit lai for canopy layer (w/m**2)
+      par_z_sun     =>    solarabs_inst%parlsun_z_patch        !rl ! Input:  [real(r8) (:,:) ]  par absorbed per unit lai for canopy layer (w/m**2)
       lai_z_sun     =>    canopystate_inst%laisun_z_patch     ! Input:  [real(r8) (:,:) ]  leaf area index for canopy layer, sunlit or shaded
       vcmaxcint_sun =>    surfalb_inst%vcmaxcintsun_patch     ! Input:  [real(r8) (:)   ]  leaf to canopy scaling coefficient
       alphapsn_sun  =>    photosyns_inst%alphapsnsun_patch    ! Input:  [real(r8) (:)   ]  13C fractionation factor for PSN ()
@@ -3202,7 +3205,8 @@ contains
       psn_wc_sun    =>    photosyns_inst%psnsun_wc_patch      ! Output: [real(r8) (:)   ]  Rubisco-limited foliage photosynthesis (umol co2 /m**2/ s) [always +]
       psn_wj_sun    =>    photosyns_inst%psnsun_wj_patch      ! Output: [real(r8) (:)   ]  RuBP-limited foliage photosynthesis (umol co2 /m**2/ s) [always +]
       psn_wp_sun    =>    photosyns_inst%psnsun_wp_patch      ! Output: [real(r8) (:)   ]  product-limited foliage photosynthesis (umol co2 /m**2/ s) [always +]
-      par_z_sha     =>    solarabs_inst%parsha_z_patch        ! Input:  [real(r8) (:,:) ]  par absorbed per unit lai for canopy layer (w/m**2)
+!rl      par_z_sha     =>    solarabs_inst%parsha_z_patch        ! Input:  [real(r8) (:,:) ]  par absorbed per unit lai for canopy layer (w/m**2)
+      par_z_sha     =>    solarabs_inst%parlsha_z_patch        !rl ! Input:  [real(r8) (:,:) ]  par absorbed per unit lai for canopy layer (w/m**2)
       lai_z_sha     =>    canopystate_inst%laisha_z_patch     ! Input:  [real(r8) (:,:) ]  leaf area index for canopy layer, sunlit or shaded
       vcmaxcint_sha =>    surfalb_inst%vcmaxcintsha_patch     ! Input:  [real(r8) (:)   ]  leaf to canopy scaling coefficient
       alphapsn_sha  =>    photosyns_inst%alphapsnsha_patch    ! Input:  [real(r8) (:)   ]  13C fractionation factor for PSN ()
@@ -5645,6 +5649,7 @@ contains
          refd        => surfalb_inst%refd_patch        , & ! Input: [real(r8) (:,:) ]  surface albedo (direct)               
          refi        => surfalb_inst%refi_patch        , & ! Input: [real(r8) (:,:) ]  surface albedo (diffuse)               		 
          ftnn        => surfalb_inst%ftnn_patch        , & ! Input: [real(r8) (:,:) ]  down nadir flux below canopy per unit nadir flx              		 
+         tii         => surfalb_inst%tii_patch        , & ! Input: [real(r8) (:,:) ]  down nadir flux below canopy per unit nadir flx              		 
 !         ftid        => surfalb_inst%ftid_patch        , & ! Input: [real(r8) (:,:) ]  surface albedo (diffuse)               		 
          ftin        => surfalb_inst%ftin_patch         & ! Input: [real(r8) (:,:) ]  down diffuse flux below canopy (per unit nadir beam flux)             		 
 		)
@@ -5655,15 +5660,15 @@ contains
        if (.not. use_fates) then
 		if (fsif(p) > 0._r8 .AND. (fsds_i(p)+fsds_d(p))>0._r8) then
 !rl CI
-		  i0s=(fsds_i(p) * exp((-elai(p)-esai(p))*CI(patch%itype(p)))+fsds_d(p)*ftdd(p,numrad))/(fsds_i(p)+fsds_d(p)) 
+		  i0s=(fsds_i(p) * tii(p,numrad)+fsds_d(p)*ftdd(p,numrad))/(fsds_i(p)+fsds_d(p)) 
 		  i0v=1._r8-i0s
 		  Rc=(fsds_i(p) * albi(p,numrad)+fsds_d(p)*albd(p,numrad))/(fsds_i(p)+fsds_d(p))
 !rl CI
-		  Rs=(fsds_i(p) * exp((-elai(p)-esai(p))*CI(patch%itype(p))) * albgri(c,numrad)+fsds_d(p)*ftdd(p,numrad)*albgrd(c,numrad)) / (fsds_i(p)+fsds_d(p)) * ftii(p,numrad)
+		  Rs=(fsds_i(p) * tii(p,numrad) * albgri(c,numrad)+fsds_d(p)*ftdd(p,numrad)*albgrd(c,numrad)) / (fsds_i(p)+fsds_d(p)) * ftii(p,numrad)
 		  Rv=Rc-Rs
 		  Rcn=(fsds_i(p) * refi(p,numrad) + fsds_d(p) * refd(p,numrad)) / (fsds_i(p) + fsds_d(p))
 !rl CI
-		  Rsn=(fsds_i(p) * exp((-elai(p)-esai(p))*CI(patch%itype(p))) * albgri(c,numrad)+fsds_d(p)*ftdd(p,numrad)*albgrd(c,numrad)) / (fsds_i(p)+fsds_d(p)) * (ftin(p,numrad)+ftnn(p,numrad))
+		  Rsn=(fsds_i(p) * tii(p,numrad) * albgri(c,numrad)+fsds_d(p)*ftdd(p,numrad)*albgrd(c,numrad)) / (fsds_i(p)+fsds_d(p)) * (ftin(p,numrad)+ftnn(p,numrad))
 		  Rvn=Rcn-Rsn
 		  if (i0v > 0._r8 .AND. omega(p,numrad) > 0._r8 ) then
 			sifesc(p)=fsif(p) * Rv / i0v / omega(p,numrad) !

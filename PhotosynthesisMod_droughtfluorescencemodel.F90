@@ -5653,6 +5653,7 @@ contains
          refi        => surfalb_inst%refi_patch        , & ! Input: [real(r8) (:,:) ]  surface albedo (diffuse)               		 
          ftnn        => surfalb_inst%ftnn_patch        , & ! Input: [real(r8) (:,:) ]  down nadir flux below canopy per unit nadir flx              		 
 !         ftid        => surfalb_inst%ftid_patch        , & ! Input: [real(r8) (:,:) ]  surface albedo (diffuse)               		 
+         tii         => surfalb_inst%tii_patch        , & ! Input: [real(r8) (:,:) ]  down nadir flux below canopy per unit nadir flx              		 
          ftin        => surfalb_inst%ftin_patch         & ! Input: [real(r8) (:,:) ]  down diffuse flux below canopy (per unit nadir beam flux)             		 
 		)
 		
@@ -5662,15 +5663,15 @@ contains
        if (.not. use_fates) then
 		if (fsif(p) > 0._r8 .AND. (fsds_i(p)+fsds_d(p))>0._r8) then
 !rl CI
-		  i0s=(fsds_i(p) * exp((-elai(p)-esai(p))*CI(patch%itype(p)))+fsds_d(p)*ftdd(p,numrad))/(fsds_i(p)+fsds_d(p)) 
+		  i0s=(fsds_i(p) * tii(p,numrad)+fsds_d(p)*ftdd(p,numrad))/(fsds_i(p)+fsds_d(p)) 
 		  i0v=1._r8-i0s
 		  Rc=(fsds_i(p) * albi(p,numrad)+fsds_d(p)*albd(p,numrad))/(fsds_i(p)+fsds_d(p))
 !rl CI
-		  Rs=(fsds_i(p) * exp((-elai(p)-esai(p))*CI(patch%itype(p))) * albgri(c,numrad)+fsds_d(p)*ftdd(p,numrad)*albgrd(c,numrad)) / (fsds_i(p)+fsds_d(p)) * ftii(p,numrad)
+		  Rs=(fsds_i(p) * tii(p,numrad) * albgri(c,numrad)+fsds_d(p)*ftdd(p,numrad)*albgrd(c,numrad)) / (fsds_i(p)+fsds_d(p)) * ftii(p,numrad)
 		  Rv=Rc-Rs
 		  Rcn=(fsds_i(p) * refi(p,numrad) + fsds_d(p) * refd(p,numrad)) / (fsds_i(p) + fsds_d(p))
 !rl CI
-		  Rsn=(fsds_i(p) * exp((-elai(p)-esai(p))*CI(patch%itype(p))) * albgri(c,numrad)+fsds_d(p)*ftdd(p,numrad)*albgrd(c,numrad)) / (fsds_i(p)+fsds_d(p)) * (ftin(p,numrad)+ftnn(p,numrad))
+		  Rsn=(fsds_i(p) * tii(p,numrad) * albgri(c,numrad)+fsds_d(p)*ftdd(p,numrad)*albgrd(c,numrad)) / (fsds_i(p)+fsds_d(p)) * (ftin(p,numrad)+ftnn(p,numrad))
 		  Rvn=Rcn-Rsn
 		  if (i0v > 0._r8 .AND. omega(p,numrad) > 0._r8 ) then
 			sifesc(p)=fsif(p) * Rv / i0v / omega(p,numrad) !

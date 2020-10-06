@@ -26,6 +26,10 @@ module SolarAbsorbedType
      real(r8), pointer :: fsa_r_patch            (:)   ! patch rural solar radiation absorbed (total) (W/m**2)
      real(r8), pointer :: parsun_z_patch         (:,:) ! patch absorbed PAR for sunlit leaves in canopy layer (W/m**2) 
      real(r8), pointer :: parsha_z_patch         (:,:) ! patch absorbed PAR for shaded leaves in canopy layer (W/m**2) 
+!rl ****
+     real(r8), pointer :: parlsun_z_patch        (:,:) ! patch absorbed PAR for sunlit leaves in canopy layer (W/m**2) per lai, note that parsun_z_patch is per (lai+sai)
+     real(r8), pointer :: parlsha_z_patch        (:,:) ! patch absorbed PAR for shaded leaves in canopy layer (W/m**2) 
+!rl $$$$
      real(r8), pointer :: par240d_z_patch        (:,:) ! 10-day running mean of daytime patch absorbed PAR for leaves in canopy layer (W/m**2) 
      real(r8), pointer :: par240x_z_patch        (:,:) ! 10-day running mean of maximum patch absorbed PAR for leaves in canopy layer (W/m**2)
      real(r8), pointer :: par24d_z_patch         (:,:) ! daily accumulated  absorbed PAR for leaves in canopy layer from midnight to current step(J/m**2) 
@@ -119,6 +123,10 @@ contains
     allocate(this%fsa_r_patch            (begp:endp))              ; this%fsa_r_patch            (:)   = nan
     allocate(this%parsun_z_patch         (begp:endp,1:nlevcan))    ; this%parsun_z_patch         (:,:) = nan
     allocate(this%parsha_z_patch         (begp:endp,1:nlevcan))    ; this%parsha_z_patch         (:,:) = nan 
+!rl ****
+    allocate(this%parlsun_z_patch        (begp:endp,1:nlevcan))    ; this%parlsun_z_patch         (:,:) = nan
+    allocate(this%parlsha_z_patch        (begp:endp,1:nlevcan))    ; this%parlsha_z_patch         (:,:) = nan 
+!rl $$$$
     if(use_luna)then
         allocate(this%par240d_z_patch    (begp:endp,1:nlevcan))    ; this%par240d_z_patch        (:,:) = spval
         allocate(this%par240x_z_patch    (begp:endp,1:nlevcan))    ; this%par240x_z_patch        (:,:) = spval 
