@@ -1,5 +1,5 @@
 # CLM5-SIF
-PhotosynthesisMod.F90: leaf level fluorescence and scaling up to canopy level 
+PhotosynthesisMod.F90: leaf level fluorescence and scaling up to canopy level (Kn calibrated with cotton dataset)
 
 PhotosynthesisMod_droughtfluorescencemodel.F90: Kn calibtrated with drought dataset
 
