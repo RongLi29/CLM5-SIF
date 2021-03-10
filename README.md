@@ -11,7 +11,7 @@ SurfaceAlbedoMod_sigma.F90: modifications of radiative transfer (the singularity
 
 SurfaceAlbedoType.F90: add variables and outputs related to radiative transfer
 
-SurfaceRadiationMod.F90: add variables for PAR absorbed by leaves only (not affected by stem/snow); PAR/SR set to be 0.435 instead of 0.5
+SurfaceRadiationMod.F90: add variables for PAR absorbed by leaves only (not affected by stem/snow); PAR/SR set to be 0.435 instead of 0.5. If coupled with CAM, the default-PAR version should be used.
 
 UrbanAlbedoMod.F90: Account for urban landuints for added variables (ftnn, ftin, refd, refi, refd_gr, refi_gr)
 
