@@ -13,6 +13,8 @@ SurfaceAlbedoType.F90: add variables and outputs related to radiative transfer
 
 SurfaceRadiationMod.F90: add variables for PAR absorbed by leaves only (not affected by stem/snow); PAR/SR set to be 0.435 instead of 0.5. If coupled with CAM, the default-PAR version should be used.
 
+SurfaceRadiationMod_oriPAR_SR_ratio.F90: The default PAR/SR=0.5 is used when not coupled with CAM (PAR is based on radiative transfer if coupled with CAM).
+
 UrbanAlbedoMod.F90: Account for urban landuints for added variables (ftnn, ftin, refd, refi, refd_gr, refi_gr)
 
 (not necessary) SolarAbsorbedType.F90: add outputs(PARSUNZ PARSHAZ) 
