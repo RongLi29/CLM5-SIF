@@ -1263,6 +1263,8 @@ contains
      real(r8) :: vp1,vp2,vp3,vp4,vu1,vu2,vu3   						! temporary
      real(r8) :: cosl 										! temporary
      real(r8) :: gamma 		 										! temporary
+	 real(r8) :: m1,m2,m31,m32,m33,m3,n3 ! for singularity of sigma, according to Dai et al,2004
+	 real(r8) :: vm1,vm2,vm31,vm32,vm33,vm3,vn3 ! for singularity of vsigma, according to Dai et al,2004
 !rl ****
 !    real(r8) :: fabsv(bounds%begp:bounds%endp,numrad)           ! convert veg+snow absorption to veg absorption
 !rl $$$$
@@ -1566,7 +1568,35 @@ contains
           tmp9 = ( u3 - tmp8*(u2-tmp0) ) * s2
           h5 = - ( tmp8*tmp4/s1 + tmp9 ) / d2
           h6 = ( tmp8*tmp5*s1 + tmp9 ) / d2
-!rl viewing ****
+!rl singularity ****
+		  if (abs(sigma) < 0.00000001_r8)then
+		      if ( .not. lSFonly )then
+			  m1 = (1._r8-albgrd(c,ib)*p1/c1)/s1
+			  m2 = (1._r8-albgrd(c,ib)*p2/c1)/s1
+			  m31 = h1/avmu(p)/avmu(p)*((elai(p)+esai(p))*CI(patch%itype(p))+1._r8/2._r8/twostext(p))*S2 
+		      m32 = albgrd(c,ib)/c1*(-1._r8/2._r8/twostext(p)*h1/avmu(p)/avmu(p)*(p3*(elai(p)+esai(p))*CI(patch%itype(p))+p4/2._r8/twostext(p))-d)*s2
+		      m33 = albgrd(c,ib)*s2
+		      m3 = m31+m32+m33;
+			  n3 = 1._r8/4._r8/twostext(p)/twostext(p)*h1/avmu(p)/avmu(p)*p4+d
+			  h2 = (m3*p2-m2*n3)/(m1*p2-m2*p1)
+			  h3 = (m3*p1-m1*n3)/(m2*p1-m1*p2)
+			  h5 = h2*p1/c1
+			  h6 = h3*p2/c1
+			  else
+			  m1=(1._r8-albsod(c,ib)*p1/c1)/s1
+			  m2=(1._r8-albsod(c,ib)*p2/c1)/s1
+			  m31=h1/avmu(p)/avmu(p)*((elai(p)+esai(p))*CI(patch%itype(p))+1._r8/2._r8/twostext(p))*S2 
+		      m32=albsod(c,ib)/c1*(-1._r8/2._r8/twostext(p)*h1/avmu(p)/avmu(p)*(p3*(elai(p)+esai(p))*CI(patch%itype(p))+p4/2._r8/twostext(p))-d)*s2
+		      m33=albsod(c,ib)*s2
+		      m3=m31+m32+m33;			  
+			  n3 = 1._r8/4._r8/twostext(p)/twostext(p)*h1/avmu(p)/avmu(p)*p4+d
+			  h2 = (m3*p2-m2*n3)/(m1*p2-m2*p1)
+			  h3 = (m3*p1-m1*n3)/(m2*p1-m1*p2)
+			  h5 = h2*p1/c1
+			  h6 = h3*p2/c1
+			  end if
+		  end if
+!rl singularity $$$$
           vb = 1._r8 - omega(p,ib) + omega(p,ib)*betai
           vc1 = omega(p,ib)*betai
           vtmp0 = avmu(p)*vtwostext(p)
@@ -1609,12 +1639,46 @@ contains
           vtmp9 = ( vu3 - vtmp8*(vu2-vtmp0) ) * s3
           vh5 = - ( vtmp8*vtmp4/s4 + vtmp9 ) / vd2
           vh6 = ( vtmp8*vtmp5*s4 + vtmp9 ) / vd2
+		  if (abs(vsigma) < 0.00000001_r8)then
+		      if ( .not. lSFonly )then
+			  vm1 = (1._r8-albgrd(c,ib)*vp1/vc1)/s4
+			  vm2 = (1._r8-albgrd(c,ib)*vp2/vc1)/s4
+			  vm31 = vh1/avmu(p)/avmu(p)*((elai(p)+esai(p))*CI(patch%itype(p))+1._r8/2._r8/vtwostext(p))*S3 
+		      vm32 = albgrd(c,ib)/vc1*(-1._r8/2._r8/vtwostext(p)*vh1/avmu(p)/avmu(p)*(vp3*(elai(p)+esai(p))*CI(patch%itype(p))+vp4/2._r8/vtwostext(p))-vd)*s3
+		      vm33 = albgrd(c,ib)*s3
+		      vm3 = vm31+vm32+vm33;
+			  vn3 = 1._r8/4._r8/vtwostext(p)/vtwostext(p)*vh1/avmu(p)/avmu(p)*vp4+vd
+			  vh2 = (vm3*vp2-vm2*vn3)/(vm1*vp2-vm2*vp1)
+			  vh3 = (vm3*vp1-vm1*vn3)/(vm2*vp1-vm1*vp2)
+			  vh5 = vh2*vp1/vc1
+			  vh6 = vh3*vp2/vc1
+			  else
+			  vm1 = (1._r8-albsod(c,ib)*vp1/vc1)/s4
+			  vm2 = (1._r8-albsod(c,ib)*vp2/vc1)/s4
+			  vm31 = vh1/avmu(p)/avmu(p)*((elai(p)+esai(p))*CI(patch%itype(p))+1._r8/2._r8/vtwostext(p))*S3 
+		      vm32 = albsod(c,ib)/vc1*(-1._r8/2._r8/vtwostext(p)*vh1/avmu(p)/avmu(p)*(vp3*(elai(p)+esai(p))*CI(patch%itype(p))+vp4/2._r8/vtwostext(p))-vd)*s3
+		      vm33 = albsod(c,ib)*s3
+		      vm3 = vm31+vm32+vm33;
+			  vn3 = 1._r8/4._r8/vtwostext(p)/vtwostext(p)*vh1/avmu(p)/avmu(p)*vp4+vd
+			  vh2 = (vm3*vp2-vm2*vn3)/(vm1*vp2-vm2*vp1)
+			  vh3 = (vm3*vp1-vm1*vn3)/(vm2*vp1-vm1*vp2)
+			  vh5 = vh2*vp1/vc1
+			  vh6 = vh3*vp2/vc1
+			  end if
+		  end if
 !rl viewing $$$$
           if ( .not. lSFonly )then
             albd(p,ib) = h1/sigma + h2 + h3
             ftid(p,ib) = h4*s2/sigma + h5*s1 + h6/s1
 !rl viewing **** 				
 			ftin(p,ib) = vh4*s3/vsigma + vh5*s4 + vh6/s4
+!rl singularity **** 				
+			if (abs(sigma) < 0.00000001_r8)then
+			albd(p,ib) = -h1/avmu(p)/avmu(p)*(1._r8/2._r8/twostext(p)) + h2 + h3
+            ftid(p,ib) = 1._r8/c1*(-1._r8/2._r8/twostext(p)*h1/avmu(p)/avmu(p)*(p3*(elai(p)+esai(p))*CI(patch%itype(p))+p4/2._r8/twostext(p))-d)*s2 + h5*s1 + h6/s1
+			ftin(p,ib) = 1._r8/vc1*(-1._r8/2._r8/vtwostext(p)*vh1/avmu(p)/avmu(p)*(vp3*(elai(p)+esai(p))*CI(patch%itype(p))+vp4/2._r8/vtwostext(p))-d)*s3 + vh5*s4 + vh6/s4
+			end if
+!rl singularity $$$$ 				
 !			refi_can1(p,ib) = vh4*s3/vsigma !test
 !			refi_can2(p,ib) = vh5*s4
 !			refi_can3(p,ib) = vh6/s4				
@@ -1636,6 +1700,17 @@ contains
           a2 = h4 / sigma * (1._r8 - s2*s2) / (2._r8 * twostext(p)) &
              + h5         * (1._r8 - s2*s1) / (twostext(p) + h) &
              + h6         * (1._r8 - s2/s1) / (twostext(p) - h)
+!rl singularity **** 				
+		  if (abs(sigma) < 0.00000001_r8)then
+          a1 = -h1/avmu(p)/avmu(p)*(1._r8/2._r8/twostext(p)) * (1._r8 - s2*s2) / (2._r8 * twostext(p)) &
+             + h2         * (1._r8 - s2*s1) / (twostext(p) + h) &
+             + h3         * (1._r8 - s2/s1) / (twostext(p) - h)
+
+          a2 = 1._r8/c1*(-1._r8/2._r8/twostext(p)*h1/avmu(p)/avmu(p)*(p3*(elai(p)+esai(p))*CI(patch%itype(p))+p4/2._r8/twostext(p))-d) * (1._r8 - s2*s2) / (2._r8 * twostext(p)) &
+             + h5         * (1._r8 - s2*s1) / (twostext(p) + h) &
+             + h6         * (1._r8 - s2/s1) / (twostext(p) - h)		  
+		  end if
+!rl singularity $$$$ 				 
           if ( .not. lSFonly )then
             fabd_sun(p,ib) = (1._r8 - omega(p,ib)) * ( 1._r8 - s2 + 1._r8 / avmu(p) * (a1 + a2) )
             fabd_sha(p,ib) = fabd(p,ib) - fabd_sun(p,ib)
@@ -1674,6 +1749,12 @@ contains
 		  vv = omega(p,ib) * vtwostext(p) * (1._r8 - vbetad)
 		  vu = omega(p,ib) * vtwostext(p) * vbetad
 		  h11 = vw + vv * h1 / sigma + vu * h4 / sigma 
+!rl singularity **** 	
+		  if (abs(sigma) < 0.00000001_r8)then
+		  h11 = vw + vv * (-h1/avmu(p)/avmu(p)*(1._r8/2._r8/twostext(p))) + vu * 1._r8/c1*(-1._r8/2._r8/twostext(p)*h1/avmu(p)/avmu(p)*(p4/2._r8/twostext(p))-d) 
+		  end if
+!rl singularity $$$$ 				
+
 		  h12 = vv * h2 + vu * h5 
 		  h13 = vv * h3 + vu * h6
 		  h14 = vv * h7 + vu * h9
