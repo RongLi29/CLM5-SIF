@@ -144,9 +144,8 @@ module pftconMod
      real(r8), allocatable :: rootprof_beta (:,:) ! CLM rooting distribution parameter for C and N inputs [unitless]
      real(r8), allocatable :: root_radius   (:)   ! root radius (m)
      real(r8), allocatable :: root_density  (:)   ! root density (gC/m3)
-!rl CI ****
+	 
      real(r8), allocatable :: CI_pft        (:)   ! clumping index [no units]
-!rl CI $$$$
      !  crop
 
      ! These arrays give information about the merge of unused crop types to the types CLM
@@ -461,9 +460,9 @@ contains
     allocate( this%fun_cn_flex_b (0:mxpft) )
     allocate( this%fun_cn_flex_c (0:mxpft) )
     allocate( this%FUN_fracfixers(0:mxpft) )
-!rl CI ****
+ 
     allocate( this%CI_pft        (0:mxpft) )        
-!rl CI $$$$    
+ 
  
   end subroutine InitAllocate
 
@@ -966,10 +965,10 @@ contains
 
     call ncd_io('max_SH_planting_date', this%mxSHplantdate, 'read', ncid, readvar=readv)  
     if ( .not. readv ) call endrun(msg=' ERROR: error in reading in pft data'//errMsg(sourcefile, __LINE__))
-!rl CI ****
+ 
     call ncd_io('CI_pft', this%CI_pft, 'read', ncid, readvar=readv, posNOTonfile=.true.)
     if ( .not. readv ) call endrun(msg=' ERROR: error in reading in pft data'//errMsg(sourcefile, __LINE__))
-!rl CI $$$$
+ 
     !
     ! Constants
     !
@@ -1381,9 +1380,9 @@ contains
     deallocate( this%fun_cn_flex_b)
     deallocate( this%fun_cn_flex_c)
     deallocate( this%FUN_fracfixers)
-!rl CI ****
+
     deallocate( this%CI_pft)
-!rl CI $$$$    
+ 
 
   end subroutine Clean
 

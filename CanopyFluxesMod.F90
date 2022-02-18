@@ -1284,14 +1284,13 @@ contains
       else
 
          ! Determine total photosynthesis
-         
+         ! Modified to include SIF simulation        
 !         call PhotosynthesisTotal(fn, filterp, &
 !              atm2lnd_inst, canopystate_inst, photosyns_inst)
 		  call PhotosynthesisTotal (fn, filterp, &
 			   atm2lnd_inst, canopystate_inst, photosyns_inst, &
-!rl up ****
 	   bounds,surfalb_inst, solarabs_inst)
-!rl up $$$$
+
          
          ! Calculate ozone stress. This needs to be done after rssun and rsshade are
          ! computed by the Photosynthesis routine. However, Photosynthesis also uses the
