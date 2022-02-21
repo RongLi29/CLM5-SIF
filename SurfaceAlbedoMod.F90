@@ -355,13 +355,6 @@ contains
 	      refi_gr       =>    surfalb_inst%refi_gr_patch          , & ! Output: [real(r8) (:,:) ]  Ground contribution to flux scattered at nadir above canopy (per unit diffuse beam flux)
           ftnn          =>    surfalb_inst%ftnn_patch             , & ! Output: [real(r8) (:,:) ]  transmittance of nadir flux 
           ftin          =>    surfalb_inst%ftin_patch             , & ! Output:  [real(r8) (:,:) ]  down diffuse flux below canopy per unit nadir flux
-		  
-          ! for modified leaf APAR simulation
-          fabsl         =>    surfalb_inst%fabsl_patch            , & ! Output:  [real(r8) (:,:) ]  used to convert leaf and stem absorption to leaf absorption 
-          fabdl_sun_z   =>    surfalb_inst%fabdl_sun_z_patch      , & ! Output:  [real(r8) (:,:) ]  absorbed sunlit leaf direct  PAR (per unit lai) for each canopy layer
-          fabdl_sha_z   =>    surfalb_inst%fabdl_sha_z_patch      , & ! Output:  [real(r8) (:,:) ]  absorbed shaded leaf direct  PAR (per unit lai) for each canopy layer
-          fabil_sun_z   =>    surfalb_inst%fabil_sun_z_patch      , & ! Output:  [real(r8) (:,:) ]  absorbed sunlit leaf diffuse PAR (per unit lai) for each canopy layer
-          fabil_sha_z   =>    surfalb_inst%fabil_sha_z_patch      , & ! Output:  [real(r8) (:,:) ]  absorbed shaded leaf diffuse PAR (per unit lai) for each canopy layer
 
           flx_absdv     =>    surfalb_inst%flx_absdv_col          , & ! Output:  [real(r8) (:,:) ]  direct flux absorption factor (col,lyr): VIS [frc]
           flx_absdn     =>    surfalb_inst%flx_absdn_col          , & ! Output:  [real(r8) (:,:) ]  direct flux absorption factor (col,lyr): NIR [frc]
@@ -790,12 +783,8 @@ contains
           p = filter_vegsol(fp)
           rho(p,ib) = max( rhol(patch%itype(p),ib)*wl(p) + rhos(patch%itype(p),ib)*ws(p), mpe )
           tau(p,ib) = max( taul(patch%itype(p),ib)*wl(p) + taus(patch%itype(p),ib)*ws(p), mpe )
-		  ! correction factor for leaf APAR calculation
-          fabsl(p,ib) = max((1._r8 - rhol(patch%itype(p),ib)-taul(patch%itype(p),ib))*wl(p)/(1.0_r8 - rho(p,ib) - tau(p,ib)), mpe) 
-
        end do
     end do
-
 
     ! Diagnose number of canopy layers for radiative transfer, in increments of dincmax.
     ! Add to number of layers so long as cumulative leaf+stem area does not exceed total
@@ -930,12 +919,6 @@ contains
           fabi_sun_z(p,iv) = 0._r8
           fabi_sha_z(p,iv) = 0._r8
           fsun_z(p,iv) = 0._r8
-          ! for leaf APAR 
-          fabdl_sun_z(p,iv) = 0._r8
-          fabdl_sha_z(p,iv) = 0._r8
-          fabil_sun_z(p,iv) = 0._r8
-          fabil_sha_z(p,iv) = 0._r8
-		  
        end do
     end do
 
@@ -977,8 +960,7 @@ contains
             coszen_patch(bounds%begp:bounds%endp), &
             rho(bounds%begp:bounds%endp, :), &
             tau(bounds%begp:bounds%endp, :), &
-!			fabsl(bounds%begp:bounds%endp, :), &
-			canopystate_inst, temperature_inst, waterstate_inst, surfalb_inst)! added fabsl
+            canopystate_inst, temperature_inst, waterstate_inst, surfalb_inst)
        ! Run TwoStream again just to calculate the Snow Free (SF) albedo's
        if (use_SSRE) then
           if ( nlevcan > 1 )then
@@ -989,9 +971,8 @@ contains
                coszen_patch(bounds%begp:bounds%endp), &
                rho(bounds%begp:bounds%endp, :), &
                tau(bounds%begp:bounds%endp, :), &
-!			   fabsl(bounds%begp:bounds%endp, :), &
                canopystate_inst, temperature_inst, waterstate_inst, surfalb_inst, &
-               SFonly=.true.)! added fabsl
+               SFonly=.true.)
        end if
     endif
 
@@ -1165,14 +1146,11 @@ contains
    end subroutine SoilAlbedo
 
    !-----------------------------------------------------------------------
-   !added fabsl as input	
    subroutine TwoStream (bounds, &
         filter_vegsol, num_vegsol, &
-!        coszen, rho, tau, fabsl, &    
-        coszen, rho, tau, &    
+        coszen, rho, tau, &
         canopystate_inst, temperature_inst, waterstate_inst, surfalb_inst, &
         SFonly)
-
      !
      ! !DESCRIPTION:
      ! Two-stream fluxes for canopy radiative transfer
@@ -1259,10 +1237,7 @@ contains
      real(r8) :: vp1,vp2,vp3,vp4,vu1,vu2,vu3   						! temporary
      real(r8) :: cosl 										! temporary
      real(r8) :: gamma 		 										! temporary
-	 real(r8) :: m1,m2,m31,m32,m33,m3,n3 ! for singularity of sigma, according to Dai et al,2004
-	 real(r8) :: vm1,vm2,vm31,vm32,vm33,vm3,vn3 ! for singularity of vsigma, according to Dai et al,2004
-
- 
+!rl viewing $$$$	 
 
      !-----------------------------------------------------------------------
 
@@ -1299,10 +1274,6 @@ contains
 
           omega        =>    surfalb_inst%omega_patch            , & ! Output:  [real(r8) (:,:) ]  fraction of intercepted radiation that is scattered(snow considered)
 
-
-          fabsl        =>    surfalb_inst%fabsl_patch            , & ! Output:  [real(r8) (:,:) ]  used to convert leaf and stem absorption to leaf absorption [pft, numrad]
-          fabsv        =>    surfalb_inst%fabsv_patch            , & ! Output:  [real(r8) (:,:) ]  convert veg+snow absorption to veg absorption)
-
           ! For non-Snow Free
           fsun_z       =>    surfalb_inst%fsun_z_patch           , & ! Output: [real(r8) (:,:) ]  sunlit fraction of canopy layer       
           vcmaxcintsun =>    surfalb_inst%vcmaxcintsun_patch     , & ! Output: [real(r8) (:)   ]  leaf to canopy scaling coefficient, sunlit leaf vcmax
@@ -1311,12 +1282,6 @@ contains
           fabd_sha_z   =>    surfalb_inst%fabd_sha_z_patch       , & ! Output: [real(r8) (:,:) ]  absorbed shaded leaf direct  PAR (per unit lai+sai) for each canopy layer
           fabi_sun_z   =>    surfalb_inst%fabi_sun_z_patch       , & ! Output: [real(r8) (:,:) ]  absorbed sunlit leaf diffuse PAR (per unit lai+sai) for each canopy layer
           fabi_sha_z   =>    surfalb_inst%fabi_sha_z_patch       , & ! Output: [real(r8) (:,:) ]  absorbed shaded leaf diffuse PAR (per unit lai+sai) for each canopy layer
-          ! for modified APAR simulation
-          fabdl_sun_z   =>    surfalb_inst%fabdl_sun_z_patch     , & ! Output: [real(r8) (:,:) ]  absorbed sunlit leaf direct  PAR (per unit lai) for each canopy layer
-          fabdl_sha_z   =>    surfalb_inst%fabdl_sha_z_patch     , & ! Output: [real(r8) (:,:) ]  absorbed shaded leaf direct  PAR (per unit lai) for each canopy layer
-          fabil_sun_z   =>    surfalb_inst%fabil_sun_z_patch     , & ! Output: [real(r8) (:,:) ]  absorbed sunlit leaf diffuse PAR (per unit lai) for each canopy layer
-          fabil_sha_z   =>    surfalb_inst%fabil_sha_z_patch     , & ! Output: [real(r8) (:,:) ]  absorbed shaded leaf diffuse PAR (per unit lai) for each canopy layer
-
           albd         =>    surfalb_inst%albd_patch             , & ! Output: [real(r8) (:,:) ]  surface albedo (direct)               
           albi         =>    surfalb_inst%albi_patch             , & ! Output: [real(r8) (:,:) ]  surface albedo (diffuse)              
           fabd         =>    surfalb_inst%fabd_patch             , & ! Output: [real(r8) (:,:) ]  flux absorbed by canopy per unit direct flux
@@ -1341,9 +1306,11 @@ contains
 	      refi_can 	   =>    surfalb_inst%refi_can_patch         , & ! Output: [real(r8) (:,:) ]  Canopy contribution to flux scattered at nadir above canopy (per unit diffuse beam flux)
 		  refd_gr      =>    surfalb_inst%refd_gr_patch          , & ! Output: [real(r8) (:,:) ]  Ground contribution to flux scattered at nadir above canopy (per unit direct beam flux)
 	      refi_gr      =>    surfalb_inst%refi_gr_patch          , & ! Output: [real(r8) (:,:) ]  Ground contribution to flux scattered at nadir above canopy (per unit diffuse beam flux)
+
           ftnn         =>    surfalb_inst%ftnn_patch              , & ! Output: [real(r8) (:,:) ]  transmittance of nadir flux 
-          tii          =>    surfalb_inst%tii_patch            	 , & ! Output:  [real(r8) (:,:) ]  
-          ftin         =>    surfalb_inst%ftin_patch               & ! Output: [real(r8) (:,:) ]  down diffuse flux below canopy per unit direct flx		  
+          tii          =>    surfalb_inst%tii_patch            	 , & ! Output:  [real(r8) (:,:) ]  																								   
+          ftin         =>    surfalb_inst%ftin_patch               & ! Output: [real(r8) (:,:) ]  down diffuse flux below canopy per unit direct flx
+		  
    )
 
     ! Calculate two-stream parameters that are independent of waveband:
@@ -1456,7 +1423,6 @@ contains
 			 tmp10 = vbetadl
 			 tmp11 = rhosnl
 			 tmp12 = tausnl
-			 fabsv(p,ib) = 1._r8
 
           else
              ! Adjust omega, betad, and betai for intercepted snow
@@ -1468,7 +1434,6 @@ contains
 				tmp10 = ( (1._r8-fcansno(p))*omegal*vbetadl + fcansno(p)*omegas(ib)*betads ) / tmp0
 				tmp11 = ( (1._r8-fcansno(p))*rhosnl + fcansno(p)*omegas(ib))
 				tmp12 = ( (1._r8-fcansno(p))*tausnl )
-				fabsv(p,ib) = (1._r8-fcansno(p))*(1._r8-omegal)/(1._r8 - tmp0)
 
              else
                 tmp0 =   (1._r8-fwet(p))*omegal        + fwet(p)*omegas(ib)
@@ -1478,7 +1443,6 @@ contains
 				tmp10 = ( (1._r8-fwet(p))*omegal*vbetadl + fwet(p)*omegas(ib)*betads ) / tmp0
 				tmp11 = ( (1._r8-fwet(p))*rhosnl + fwet(p)*omegas(ib))
 				tmp12 = ( (1._r8-fwet(p))*tausnl )
-				fabsv(p,ib) = (1._r8-fwet(p))*(1._r8-omegal)/(1._r8 - tmp0)
 
              end if
           end if  ! end Snow free
@@ -1511,19 +1475,18 @@ contains
 
 !          t1 = min(h*(elai(p)+esai(p)), 40._r8)
  		  t1 = min(1._r8 / avmu(p)*(elai(p)+esai(p)), 40._r8)*CI(patch%itype(p))
-		  tii(p,ib) = exp(-t1)
-		  t1 = min(h*(elai(p)+esai(p)), 40._r8)*CI(patch%itype(p)) 
+		  tii(p,ib) = exp(-t1)																	   
+          t1 = min(h*(elai(p)+esai(p)), 40._r8)*CI(patch%itype(p)) 
           s1 = exp(-t1)
 !          t1 = min(twostext(p)*(elai(p)+esai(p)), 40._r8)
           t1 = min(twostext(p)*(elai(p)+esai(p)), 40._r8)*CI(patch%itype(p)) 
           s2 = exp(-t1)
-! 
+ 
 !		  t2 = min(vtwostext(p)*(elai(p)+esai(p)), 40._r8)
 		  t2 = min(vtwostext(p)*(elai(p)+esai(p)), 40._r8)*CI(patch%itype(p)) 
           s3 = exp(-t2)
 		  ftnn(p,ib) = s3
-
-		  
+	  
           ! Direct beam
           if ( .not. lSFonly )then
              u1 = b - c1/albgrd(c,ib)
@@ -1552,35 +1515,6 @@ contains
           tmp9 = ( u3 - tmp8*(u2-tmp0) ) * s2
           h5 = - ( tmp8*tmp4/s1 + tmp9 ) / d2
           h6 = ( tmp8*tmp5*s1 + tmp9 ) / d2
-          ! singularity ****
-		  if (abs(sigma) < 0.00000001_r8)then
-		      if ( .not. lSFonly )then
-			  m1 = (1._r8-albgrd(c,ib)*p1/c1)/s1
-			  m2 = (1._r8-albgrd(c,ib)*p2/c1)/s1
-			  m31 = h1/avmu(p)/avmu(p)*((elai(p)+esai(p))*CI(patch%itype(p))+1._r8/2._r8/twostext(p))*S2 
-		      m32 = albgrd(c,ib)/c1*(-1._r8/2._r8/twostext(p)*h1/avmu(p)/avmu(p)*(p3*(elai(p)+esai(p))*CI(patch%itype(p))+p4/2._r8/twostext(p))-d)*s2
-		      m33 = albgrd(c,ib)*s2
-		      m3 = m31+m32+m33;
-			  n3 = 1._r8/4._r8/twostext(p)/twostext(p)*h1/avmu(p)/avmu(p)*p4+d
-			  h2 = (m3*p2-m2*n3)/(m1*p2-m2*p1)
-			  h3 = (m3*p1-m1*n3)/(m2*p1-m1*p2)
-			  h5 = h2*p1/c1
-			  h6 = h3*p2/c1
-			  else
-			  m1=(1._r8-albsod(c,ib)*p1/c1)/s1
-			  m2=(1._r8-albsod(c,ib)*p2/c1)/s1
-			  m31=h1/avmu(p)/avmu(p)*((elai(p)+esai(p))*CI(patch%itype(p))+1._r8/2._r8/twostext(p))*S2 
-		      m32=albsod(c,ib)/c1*(-1._r8/2._r8/twostext(p)*h1/avmu(p)/avmu(p)*(p3*(elai(p)+esai(p))*CI(patch%itype(p))+p4/2._r8/twostext(p))-d)*s2
-		      m33=albsod(c,ib)*s2
-		      m3=m31+m32+m33;			  
-			  n3 = 1._r8/4._r8/twostext(p)/twostext(p)*h1/avmu(p)/avmu(p)*p4+d
-			  h2 = (m3*p2-m2*n3)/(m1*p2-m2*p1)
-			  h3 = (m3*p1-m1*n3)/(m2*p1-m1*p2)
-			  h5 = h2*p1/c1
-			  h6 = h3*p2/c1
-			  end if
-		  end if
-          
 		  ! nair viewing
           vb = 1._r8 - omega(p,ib) + omega(p,ib)*betai
           vc1 = omega(p,ib)*betai
@@ -1594,7 +1528,7 @@ contains
           vp2 = vb - avmu(p)*vh
           vp3 = vb + vtmp0
           vp4 = vb - vtmp0
-! 		  t2 = min(vh*(elai(p)+esai(p)), 40._r8)
+!		  t2 = min(vh*(elai(p)+esai(p)), 40._r8)
 		  t2 = min(vh*(elai(p)+esai(p)), 40._r8)*CI(patch%itype(p)) 	
           s4 = exp(-t2)
 		  if ( .not. lSFonly )then
@@ -1624,45 +1558,12 @@ contains
           vtmp9 = ( vu3 - vtmp8*(vu2-vtmp0) ) * s3
           vh5 = - ( vtmp8*vtmp4/s4 + vtmp9 ) / vd2
           vh6 = ( vtmp8*vtmp5*s4 + vtmp9 ) / vd2
-		  if (abs(vsigma) < 0.00000001_r8)then
-		      if ( .not. lSFonly )then
-			  vm1 = (1._r8-albgrd(c,ib)*vp1/vc1)/s4
-			  vm2 = (1._r8-albgrd(c,ib)*vp2/vc1)/s4
-			  vm31 = vh1/avmu(p)/avmu(p)*((elai(p)+esai(p))*CI(patch%itype(p))+1._r8/2._r8/vtwostext(p))*S3 
-		      vm32 = albgrd(c,ib)/vc1*(-1._r8/2._r8/vtwostext(p)*vh1/avmu(p)/avmu(p)*(vp3*(elai(p)+esai(p))*CI(patch%itype(p))+vp4/2._r8/vtwostext(p))-vd)*s3
-		      vm33 = albgrd(c,ib)*s3
-		      vm3 = vm31+vm32+vm33;
-			  vn3 = 1._r8/4._r8/vtwostext(p)/vtwostext(p)*vh1/avmu(p)/avmu(p)*vp4+vd
-			  vh2 = (vm3*vp2-vm2*vn3)/(vm1*vp2-vm2*vp1)
-			  vh3 = (vm3*vp1-vm1*vn3)/(vm2*vp1-vm1*vp2)
-			  vh5 = vh2*vp1/vc1
-			  vh6 = vh3*vp2/vc1
-			  else
-			  vm1 = (1._r8-albsod(c,ib)*vp1/vc1)/s4
-			  vm2 = (1._r8-albsod(c,ib)*vp2/vc1)/s4
-			  vm31 = vh1/avmu(p)/avmu(p)*((elai(p)+esai(p))*CI(patch%itype(p))+1._r8/2._r8/vtwostext(p))*S3 
-		      vm32 = albsod(c,ib)/vc1*(-1._r8/2._r8/vtwostext(p)*vh1/avmu(p)/avmu(p)*(vp3*(elai(p)+esai(p))*CI(patch%itype(p))+vp4/2._r8/vtwostext(p))-vd)*s3
-		      vm33 = albsod(c,ib)*s3
-		      vm3 = vm31+vm32+vm33;
-			  vn3 = 1._r8/4._r8/vtwostext(p)/vtwostext(p)*vh1/avmu(p)/avmu(p)*vp4+vd
-			  vh2 = (vm3*vp2-vm2*vn3)/(vm1*vp2-vm2*vp1)
-			  vh3 = (vm3*vp1-vm1*vn3)/(vm2*vp1-vm1*vp2)
-			  vh5 = vh2*vp1/vc1
-			  vh6 = vh3*vp2/vc1
-			  end if
-		  end if
-
+!
           if ( .not. lSFonly )then
             albd(p,ib) = h1/sigma + h2 + h3
             ftid(p,ib) = h4*s2/sigma + h5*s1 + h6/s1
-            ! for narid viewing				
+            ! for narid viewing	 				
 			ftin(p,ib) = vh4*s3/vsigma + vh5*s4 + vh6/s4
-            ! singularity 				
-			if (abs(sigma) < 0.00000001_r8)then
-			albd(p,ib) = -h1/avmu(p)/avmu(p)*(1._r8/2._r8/twostext(p)) + h2 + h3
-            ftid(p,ib) = 1._r8/c1*(-1._r8/2._r8/twostext(p)*h1/avmu(p)/avmu(p)*(p3*(elai(p)+esai(p))*CI(patch%itype(p))+p4/2._r8/twostext(p))-d)*s2 + h5*s1 + h6/s1
-			ftin(p,ib) = 1._r8/vc1*(-1._r8/2._r8/vtwostext(p)*vh1/avmu(p)/avmu(p)*(vp3*(elai(p)+esai(p))*CI(patch%itype(p))+vp4/2._r8/vtwostext(p))-d)*s3 + vh5*s4 + vh6/s4
-			end if
 
             ftdd(p,ib) = s2
             fabd(p,ib) = 1._r8 - albd(p,ib) - (1._r8-albgrd(c,ib))*ftdd(p,ib) - (1._r8-albgri(c,ib))*ftid(p,ib)
@@ -1678,17 +1579,6 @@ contains
           a2 = h4 / sigma * (1._r8 - s2*s2) / (2._r8 * twostext(p)) &
              + h5         * (1._r8 - s2*s1) / (twostext(p) + h) &
              + h6         * (1._r8 - s2/s1) / (twostext(p) - h)
-          ! singularity				
-		  if (abs(sigma) < 0.00000001_r8)then
-          a1 = -h1/avmu(p)/avmu(p)*(1._r8/2._r8/twostext(p)) * (1._r8 - s2*s2) / (2._r8 * twostext(p)) &
-             + h2         * (1._r8 - s2*s1) / (twostext(p) + h) &
-             + h3         * (1._r8 - s2/s1) / (twostext(p) - h)
-
-          a2 = 1._r8/c1*(-1._r8/2._r8/twostext(p)*h1/avmu(p)/avmu(p)*(p3*(elai(p)+esai(p))*CI(patch%itype(p))+p4/2._r8/twostext(p))-d) * (1._r8 - s2*s2) / (2._r8 * twostext(p)) &
-             + h5         * (1._r8 - s2*s1) / (twostext(p) + h) &
-             + h6         * (1._r8 - s2/s1) / (twostext(p) - h)		  
-		  end if
-          				 
           if ( .not. lSFonly )then
             fabd_sun(p,ib) = (1._r8 - omega(p,ib)) * ( 1._r8 - s2 + 1._r8 / avmu(p) * (a1 + a2) )
             fabd_sha(p,ib) = fabd(p,ib) - fabd_sun(p,ib)
@@ -1715,7 +1605,7 @@ contains
           h9 = tmp4 / (d2*s1)
           h10 = (-tmp5*s1) / d2
 
-          ! for nadir viewing
+          ! for narid viewing	
 		  cosl = (1._r8 + chil(p))/2._r8
 		  cosz = max(0.001_r8, coszen(p))
 		  if ((acos(cosl)+acos(cosz)) < Pi/2._r8)then
@@ -1727,11 +1617,6 @@ contains
 		  vv = omega(p,ib) * vtwostext(p) * (1._r8 - vbetad)
 		  vu = omega(p,ib) * vtwostext(p) * vbetad
 		  h11 = vw + vv * h1 / sigma + vu * h4 / sigma 
-          ! singularity	
-		  if (abs(sigma) < 0.00000001_r8)then
-		  h11 = vw + vv * (-h1/avmu(p)/avmu(p)*(1._r8/2._r8/twostext(p))) + vu * 1._r8/c1*(-1._r8/2._r8/twostext(p)*h1/avmu(p)/avmu(p)*(p4/2._r8/twostext(p))-d) 
-		  end if				
-
 		  h12 = vv * h2 + vu * h5 
 		  h13 = vv * h3 + vu * h6
 		  h14 = vv * h7 + vu * h9
@@ -1773,45 +1658,39 @@ contains
 			refd_can(p,ib) = h11 * (1._r8 - s2 * s3)/ (twostext(p) + vtwostext(p)) + h12 * (1._r8 - s1 * s3)/ (h + vtwostext(p))  + h13 * ((elai(p)+esai(p))*CI(patch%itype(p)) + 0.50_r8*(elai(p)+esai(p))*CI(patch%itype(p))*(elai(p)+esai(p))*CI(patch%itype(p))*(h-vtwostext(p)))
 			refi_can(p,ib) = h14 * (1._r8 - s3*s1) / (vtwostext(p) + h) +  h15 * ((elai(p)+esai(p))*CI(patch%itype(p)) + 0.50_r8*(elai(p)+esai(p))*CI(patch%itype(p))*(elai(p)+esai(p))*CI(patch%itype(p))*(h-vtwostext(p))) 	!rl CI ****
 			end if
-		
+
             ! Ground
 			refd_gr(p,ib) = (s2 * albgrd(c,ib) + ftid(p,ib) * albgri(c,ib)) * s3 ! Direct Ground
 			refi_gr(p,ib) = ftii(p,ib) * albgri(c,ib) * s3 ! Diffuse Ground
 			
 			refd(p,ib) = refd_can(p,ib) + refd_gr(p,ib)
 			refi(p,ib) = refi_can(p,ib) + refi_gr(p,ib)
- 
+   
             if (ib == 1) then
                if (nlevcan == 1) then
   
                   ! sunlit fraction of canopy
-                  !fsun_z(p,1) = (1._r8 - s2) / t1
+!                  fsun_z(p,1) = (1._r8 - s2) / t1
                   fsun_z(p,1) = (1._r8 - s2) / t1*CI(patch%itype(p))
   
                   ! absorbed PAR (per unit sun/shade lai+sai)
                   laisum = elai(p)+esai(p)
-                  !laisum = (elai(p)+esai(p))*CI(patch%itype(p))
+!                  laisum = (elai(p)+esai(p))*CI(patch%itype(p))
                   fabd_sun_z(p,1) = fabd_sun(p,ib) / (fsun_z(p,1)*laisum)
                   fabi_sun_z(p,1) = fabi_sun(p,ib) / (fsun_z(p,1)*laisum)
                   fabd_sha_z(p,1) = fabd_sha(p,ib) / ((1._r8 - fsun_z(p,1))*laisum)
                   fabi_sha_z(p,1) = fabi_sha(p,ib) / ((1._r8 - fsun_z(p,1))*laisum)
-                  ! for modified leaf APAR simulation
-                  fabdl_sun_z(p,1) = fabd_sun(p,ib)*fabsl(p,ib)*fabsv(p,ib) / (fsun_z(p,1)*elai(p))
-                  fabil_sun_z(p,1) = fabi_sun(p,ib)*fabsl(p,ib)*fabsv(p,ib) / (fsun_z(p,1)*elai(p))
-                  fabdl_sha_z(p,1) = fabd_sha(p,ib)*fabsl(p,ib)*fabsv(p,ib) / ((1._r8 - fsun_z(p,1))*elai(p))
-                  fabil_sha_z(p,1) = fabi_sha(p,ib)*fabsl(p,ib)*fabsv(p,ib) / ((1._r8 - fsun_z(p,1))*elai(p))
 
   
                   ! leaf to canopy scaling coefficients
                   extkn = 0.30_r8
 
                   if (elai(p)  >  0._r8) then
-
-				    extkb = twostext(p)*CI(patch%itype(p))*(elai(p)+esai(p))/(elai(p))                   
-                    !vcmaxcintsun(p) = (1._r8 - exp(-(extkn+extkb)*elai(p))) / (extkn + extkb)
+				    extkb = twostext(p)*CI(patch%itype(p))*(elai(p)+esai(p))/(elai(p))                  
+!					vcmaxcintsun(p) = (1._r8 - exp(-(extkn+extkb)*elai(p))) / (extkn + extkb)
 					vcmaxcintsun(p) = CI(patch%itype(p))*(1._r8 - exp(-(extkn+extkb)*elai(p))) / (extkn + extkb*CI(patch%itype(p)))
 					vcmaxcintsha(p) = (1._r8 - exp(-extkn*elai(p))) / extkn - vcmaxcintsun(p)
-
+!
 					vcmaxcintsun(p) = vcmaxcintsun(p) / (fsun_z(p,1)*elai(p))
                     vcmaxcintsha(p) = vcmaxcintsha(p) / ((1._r8 - fsun_z(p,1))*elai(p))
                   else
@@ -1825,10 +1704,10 @@ contains
                      ! Cumulative lai+sai at center of layer
   
                      if (iv == 1) then
-!                       laisum = 0.5_r8 * (tlai_z(p,iv)+tsai_z(p,iv))
+!                        laisum = 0.5_r8 * (tlai_z(p,iv)+tsai_z(p,iv))
                        laisum = 0.5_r8 * (tlai_z(p,iv)+tsai_z(p,iv))*CI(patch%itype(p)) 	!rl CI $$$$
                      else
-!                       laisum = laisum + 0.5_r8 * ((tlai_z(p,iv-1)+tsai_z(p,iv-1))+(tlai_z(p,iv)+tsai_z(p,iv)))
+!                        laisum = laisum + 0.5_r8 * ((tlai_z(p,iv-1)+tsai_z(p,iv-1))+(tlai_z(p,iv)+tsai_z(p,iv)))
                        laisum = laisum + 0.5_r8 * ((tlai_z(p,iv-1)+tsai_z(p,iv-1))+(tlai_z(p,iv)+tsai_z(p,iv)))*CI(patch%itype(p)) 	!rl CI $$$$
                      end if
   
@@ -1953,12 +1832,6 @@ contains
   
                      fabi_sun_z(p,iv) = fabi_sun_z(p,iv) / fsun_z(p,iv)
                      fabi_sha_z(p,iv) = fabi_sha_z(p,iv) / (1._r8 - fsun_z(p,iv))
-
-                     ! for modified leaf APAR simulation
-					 fabdl_sun_z(p,iv) = fabd_sun_z(p,ib)*fabsl(p,ib)*fabsv(p,ib)* (tlai_z(p,iv)+tsai_z(p,iv)) / tlai_z(p,iv)
-					 fabil_sun_z(p,iv) = fabi_sun_z(p,ib)*fabsl(p,ib)*fabsv(p,ib)* (tlai_z(p,iv)+tsai_z(p,iv)) / tlai_z(p,iv)
-					 fabdl_sha_z(p,iv) = fabd_sha_z(p,ib)*fabsl(p,ib)*fabsv(p,ib)* (tlai_z(p,iv)+tsai_z(p,iv)) / tlai_z(p,iv)
-					 fabil_sha_z(p,iv) = fabi_sha_z(p,ib)*fabsl(p,ib)*fabsv(p,ib)* (tlai_z(p,iv)+tsai_z(p,iv)) / tlai_z(p,iv)
 					 
                   end do ! end of iv loop
                end if ! nlevcan

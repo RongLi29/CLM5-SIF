@@ -405,8 +405,6 @@ contains
           fabdl_sha_z  => surfalb_inst%fabdl_sha_z_patch, & ! absorbed shaded leaf direct PAR
           fabil_sun_z  => surfalb_inst%fabil_sun_z_patch, & ! absorbed sunlit leaf diffuse PAR
           fabil_sha_z  => surfalb_inst%fabil_sha_z_patch, & ! absorbed shaded leaf diffuse PAR
-		  parlsun_z    => solarabs_inst%parlsun_z_patch, &  ! absorbed PAR for sunlit leaves
-          parlsha_z    => solarabs_inst%parlsha_z_patch, &  ! absorbed PAR for shaded leaves
 
           laisun      => canopystate_inst%laisun_patch, & ! sunlit leaf area
           laisha      => canopystate_inst%laisha_patch, & ! shaded  leaf area
@@ -423,10 +421,6 @@ contains
            parsha_z(p,iv) = 0._r8
            laisun_z(p,iv) = 0._r8
            laisha_z(p,iv) = 0._r8
-           ! for leaf APAR
-           parlsun_z(p,iv) = 0._r8
-           parlsha_z(p,iv) = 0._r8
-
         end do
         
         ! Loop over patches to calculate laisun_z and laisha_z for each layer.
@@ -455,12 +449,8 @@ contains
         g = patch%gridcell(p)
         
         do iv = 1, nrad(p)
-           parsun_z(p,iv) = forc_solad(g,ipar)*fabd_sun_z(p,iv) + forc_solai(g,ipar)*fabi_sun_z(p,iv)
-           parsha_z(p,iv) = forc_solad(g,ipar)*fabd_sha_z(p,iv) + forc_solai(g,ipar)*fabi_sha_z(p,iv)
-           ! for leaf APAR
-           parlsun_z(p,iv) = forc_solad(g,ipar)*fabdl_sun_z(p,iv)*0.87 + forc_solai(g,ipar)*fabil_sun_z(p,iv)*0.87
-           parlsha_z(p,iv) = forc_solad(g,ipar)*fabdl_sha_z(p,iv)*0.87 + forc_solai(g,ipar)*fabil_sha_z(p,iv)*0.87
-
+           parsun_z(p,iv) = forc_solad(g,ipar)*fabd_sun_z(p,iv)*0.87 + forc_solai(g,ipar)*fabi_sun_z(p,iv)*0.87
+           parsha_z(p,iv) = forc_solad(g,ipar)*fabd_sha_z(p,iv)*0.87 + forc_solai(g,ipar)*fabi_sha_z(p,iv)*0.87
         end do
         
      end do ! end of fp = 1,num_nourbanp loop
