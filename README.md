@@ -26,7 +26,7 @@ CanopyFluxesMod.F90: add input variables when calling PhotosynthesisTotal (for c
 
 pftconMod.F90: add Clumping index for each pft as an input
 
-Please use code in branch "orginal APAR calculation" for simulation without the correction of snow and stem for leaf APAR estimation
+Code in branch "orginal APAR calculation" is for simulation without the correction of snow and stem for leaf APAR estimation
 
 Folder 'input' contains input parameter files with different modifications incorporated. All files have an added variable 'CI_pft' providing clumping index for each PFT. 
 
