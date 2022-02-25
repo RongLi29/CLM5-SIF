@@ -12,6 +12,8 @@ PhotosynthesisMod_droughtfluorescencemodel.F90: Kn calibtrated with drought data
 
 PhotosynthesisMod_sustainedNPQ.F90: consideres sustained NPQ according to Raczka et al (2019)
 
+SolarAbsorbedType.F90: added variables needed for the modified leaf APAR calculation
+
 SurfaceAlbedoMod.F90: modifications of radiative transfer
 
 SurfaceAlbedoType.F90: add variables and outputs related to radiative transfer
